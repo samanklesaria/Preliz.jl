@@ -1,0 +1,14 @@
+name = "Preliz"
+uuid = "fcc48eee-6735-4e30-b603-2530e0f866fb"
+version = "0.1.0"
+authors = ["Sam Anklesaria <anklesarian@gmail.com>"]
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+
+[compat]
+Distributions = "0.25.123"
+DocStringExtensions = "0.9.5"
+PythonCall = "0.9.31"
