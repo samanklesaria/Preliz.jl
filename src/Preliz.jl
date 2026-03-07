@@ -1,9 +1,8 @@
 module Preliz
 using PythonCall, Distributions
 include("docboilerplate.jl")
-export maxent
 
-pz = pyimport("preliz")
+export maxent
 
 macro gen_maxent(DistTypes...)
     funcs = map(DistTypes) do DistType
@@ -23,6 +22,7 @@ macro gen_maxent(DistTypes...)
             This function uses the Python preliz package's maxent implementation internally.
             """
             function $(esc(:maxent))(::Type{$(esc(DistType))}, lower, upper, mass)
+                pz = pyimport("preliz")
                 prior = pz.$(Symbol(dist_name))()
                 pz.maxent(prior, lower=lower, upper=upper, mass=mass)
                 $(esc(DistType))(pyconvert(Vector{Float64}, prior.params)...)
@@ -34,8 +34,24 @@ end
 
 @gen_maxent Beta Normal LogNormal Gamma
 
-function main()
-    println(maxent(Beta, 0.01, 0.05, 0.9))
+function __init__()
+    dist_map = [
+        (Beta, "preliz.distributions.beta:Beta"),
+        (Normal, "preliz.distributions.normal:Normal"),
+        (LogNormal, "preliz.distributions.lognormal:LogNormal"),
+        (Gamma, "preliz.distributions.gamma:Gamma")
+    ]
+    for (DistType, tname) in dist_map
+        PythonCall.pyconvert_add_rule(
+            tname,
+            DistType,
+            (T, x) -> begin
+                params = pyconvert(Vector{Float64}, x.params)
+                PythonCall.pyconvert_return(T(params...))
+            end,
+            PythonCall.PYCONVERT_PRIORITY_NORMAL
+        )
+    end
 end
 
 end # module Preliz
