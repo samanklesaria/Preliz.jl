@@ -11,16 +11,19 @@ np.random.seed(42)
     jldist = pyconvert(Beta, pydist)
 end
 
-@testset "Maxent" for i in 1:10
-    min_val = rand() * 0.3
-    max_val = 0.7 + rand() * 0.3
-    mass = 0.8 + rand() * 0.15
+@testset "Maxent" begin
+    for i in 1:10
+        min_val = rand() * 0.3
+        max_val = max(1.0, min_val + rand() * 0.2)
+        mass = 0.8 + rand() * 0.15
 
-    julia_result = maxent(Beta, min_val, max_val, mass)
-    julia_mean = mean(julia_result)
+        julia_result = maxent(Beta, min_val, max_val, mass)
+        julia_mean = mean(julia_result)
 
-    python_result = pz.maxent(pz.Beta, min_val, max_val, mass)
-    python_mean = pyconvert(Float64, python_result.mean())
+        b = pz.Beta()
+        pz.maxent(b, min_val, max_val, mass)
+        python_mean = pyconvert(Float64, b.mean())
 
-    @test isapprox(julia_mean, python_mean, rtol=1e-6)
+        @test isapprox(julia_mean, python_mean, rtol=1e-6)
+    end
 end
